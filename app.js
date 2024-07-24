@@ -52,15 +52,15 @@ function checkFileExists(filePath) {
         console.error("".concat(filePath, " does not exist."));
     }
 }
-// Function to log file content
-function logFileContentSync(filePath) {
-    try {
-        var data = fs.readFileSync(filePath, 'utf8');
-        console.log("Content of ".concat(filePath, ":"), data);
-    }
-    catch (err) {
-        console.error("Error reading file ".concat(filePath, ":"), err);
-    }
+function logFileContent(filePath) {
+    fs.readFile(filePath, 'utf8', function (err, data) {
+        if (err) {
+            console.error("Error reading file ".concat(filePath, ":"), err);
+        }
+        else {
+            console.log("Content of ".concat(filePath, ":"), data);
+        }
+    });
 }
 function importCourses() {
     return __awaiter(this, void 0, void 0, function () {
@@ -72,7 +72,7 @@ function importCourses() {
                     coursesPath = path.resolve(__dirname, 'CSV', 'courses.csv');
                     console.log('Courses Path:', coursesPath);
                     checkFileExists(coursesPath);
-                    logFileContentSync(coursesPath);
+                    logFileContent(coursesPath);
                     return [4 /*yield*/, csvtojson().fromFile(coursesPath)];
                 case 1:
                     courses = _a.sent();
@@ -111,7 +111,7 @@ function importPrerequisites() {
                     prerequisitesPath = path.resolve(__dirname, 'CSV', 'prerequisites.csv');
                     console.log('Prerequisites Path:', prerequisitesPath);
                     checkFileExists(prerequisitesPath);
-                    logFileContentSync(prerequisitesPath);
+                    logFileContent(prerequisitesPath);
                     return [4 /*yield*/, csvtojson().fromFile(prerequisitesPath)];
                 case 1:
                     prerequisites = _a.sent();
@@ -163,12 +163,16 @@ function main() {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 4, 5, 6]);
+                    // Connect to MongoDB
                     return [4 /*yield*/, mongoose_1.default.connect(config_1.default.mongoURI)];
                 case 1:
+                    // Connect to MongoDB
                     _a.sent();
                     console.log('Connected with the database');
+                    // Import data
                     return [4 /*yield*/, importCourses()];
                 case 2:
+                    // Import data
                     _a.sent();
                     return [4 /*yield*/, importPrerequisites()];
                 case 3:
@@ -179,6 +183,7 @@ function main() {
                     console.error('Database connection error:', err_1);
                     return [3 /*break*/, 6];
                 case 5:
+                    // Close the database connection
                     mongoose_1.default.connection.close();
                     return [7 /*endfinally*/];
                 case 6: return [2 /*return*/];

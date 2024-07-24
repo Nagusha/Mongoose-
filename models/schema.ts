@@ -2,6 +2,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 // Define the CourseLevel enum
 enum CourseLevel {
+    Beginner = 'Beginner',
+    Intermediate = 'Intermediate',
+    Advanced = 'Advanced',
     SSC = 'SSC',
     Diploma = 'Diploma',
     Inter = 'Inter',
@@ -11,33 +14,37 @@ enum CourseLevel {
     MBBS = 'MBBS',
 }
 
-interface ICourse extends Document {
+export interface ICourse extends Document {
     name: string;
     level: CourseLevel;
-    prerequisite_name: string;
+    prerequisite_name?: string;
 }
 
-// Define the Course schema
 const CourseSchema: Schema = new Schema({
-    name: { type: String, required: true },
-    level: { type: String, enum: Object.values(CourseLevel), required: true },
-    prerequisite_name: { type: String, required: false, default: null }
+    name: { 
+        type: String, 
+        required: true,
+    },
+    level: { 
+        type: String, 
+        enum: Object.values(CourseLevel), 
+        required: true 
+    },
+    prerequisite_name: { 
+        type: String 
+    }
 });
 
-// Define the Prerequisite interface
-interface IPrerequisite extends Document {
+export const Course = mongoose.model<ICourse>('Course', CourseSchema);
+
+export interface IPrerequisite extends Document {
     course: mongoose.Types.ObjectId;
     prerequisite: mongoose.Types.ObjectId;
 }
 
-// Define the Prerequisite schema
 const PrerequisiteSchema: Schema = new Schema({
-    course: { type: mongoose.Types.ObjectId, ref: 'Course', required: true },
-    prerequisite: { type: mongoose.Types.ObjectId, ref: 'Course', required: true }
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+    prerequisite: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true }
 });
 
-// Create models
-const Course = mongoose.model<ICourse>('Course', CourseSchema);
-const Prerequisite = mongoose.model<IPrerequisite>('Prerequisite', PrerequisiteSchema);
-
-export { Course, Prerequisite, ICourse, IPrerequisite, CourseLevel };
+export const Prerequisite = mongoose.model<IPrerequisite>('Prerequisite', PrerequisiteSchema);
