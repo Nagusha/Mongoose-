@@ -1,7 +1,13 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import * as csvtojson from 'csvtojson';
+//import mongoose, { Schema, Document } from 'mongoose';
+//import * as csvtojson from 'csvtojson';
+import express from 'express';
+import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import csvtojson from 'csvtojson';
 import * as path from 'path';
-import config from './config/config';
+//import config from './config/config';
+import courseRoutes from './routes/courses';
+import prerequisiteRoutes from './routes/prerequisites';
 import * as fs from 'fs';
 import { Course, Prerequisite } from './models/schema';
 
@@ -104,3 +110,56 @@ async function main() {
 }
 
 main();
+
+//routes
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Config
+const config = {
+    mongoURI: 'your_mongodb_uri',
+    coursesPath: '/Users/administrator/Desktop/Mongoosse/CSV/courses.csv',
+    prerequisitesPath: '/Users/administrator/Desktop/Mongoosse/CSV/prerequisites.csv'
+};
+
+// Middleware
+app.use(bodyParser.json());
+
+// Routes
+app.use('/courses', courseRoutes);
+app.use('/prerequisites', prerequisiteRoutes);
+
+app.get('/', (req: express.Request, res: express.Response) => {
+    res.send('Hello, world!');
+});
+
+// Connect to MongoDB
+mongoose.connect(config.mongoURI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.log(`Error connecting to MongoDB: ${err.message}`));
+
+// Import courses and prerequisites
+const importData = async () => {
+    try {
+        const courses = await csvtojson().fromFile(config.coursesPath);
+        await Course.insertMany(courses);
+        console.log('Courses imported successfully');
+    } catch (err) {
+        console.error('Error importing courses:', err);
+    }
+
+    try {
+        const prerequisites = await csvtojson().fromFile(config.prerequisitesPath);
+        await Prerequisite.insertMany(prerequisites);
+        console.log('Prerequisites imported successfully');
+    } catch (err) {
+        console.error('Error importing prerequisites:', err);
+    }
+};
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    importData();
+});
