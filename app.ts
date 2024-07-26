@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import csvtojson from 'csvtojson';
 import * as path from 'path';
 //import config from './config/config';
-import courseRoutes from './routes/courses';
+import courseRoutes from './routes/course';
 import prerequisiteRoutes from './routes/prerequisites';
 import * as fs from 'fs';
 import { Course, Prerequisite } from './models/schema';
