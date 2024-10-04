@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-// Define the CourseLevel enum
 enum CourseLevel {
     Beginner = 'Beginner',
     Intermediate = 'Intermediate',
