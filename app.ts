@@ -1,17 +1,14 @@
-//import mongoose, { Schema, Document } from 'mongoose';
-//import * as csvtojson from 'csvtojson';
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import csvtojson from 'csvtojson';
 import * as path from 'path';
-//import config from './config/config';
 import courseRoutes from './routes/course';
 import prerequisiteRoutes from './routes/prerequisites';
 import * as fs from 'fs';
 import { Course, Prerequisite } from './models/schema';
 
-// Function to check if a file exists
 function checkFileExists(filePath: string) {
     try {
         fs.accessSync(filePath, fs.constants.F_OK);
@@ -39,10 +36,9 @@ async function importCourses(): Promise<void> {
         logFileContent(coursesPath);
 
         const courses = await csvtojson().fromFile(coursesPath);
-        console.log('Courses Data:', courses); // Log imported data
+        console.log('Courses Data:', courses); 
 
         if (courses.length > 0) {
-            // Ensure all fields match the schema
             const formattedCourses = courses.map((course: any) => ({
                 name: course.name,
                 level: course.level,
@@ -72,7 +68,6 @@ async function importPrerequisites(): Promise<void> {
             for (const item of prerequisites) {
                 const { course_name, prerequisite_name } = item;
 
-                // Find course and prerequisite by name
                 const course = await Course.findOne({ name: course_name });
                 const prerequisite = await Course.findOne({ name: prerequisite_name });
 
@@ -94,38 +89,31 @@ async function importPrerequisites(): Promise<void> {
 
 async function main() {
     try {
-        // Connect to MongoDB
         await mongoose.connect(config.mongoURI);
         console.log('Connected with the database');
 
-        // Import data
         await importCourses();
         await importPrerequisites();
     } catch (err) {
         console.error('Database connection error:', err);
     } finally {
-        // Close the database connection
         mongoose.connection.close();
     }
 }
 
 main();
 
-//routes
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Config
 const config = {
     mongoURI: 'your_mongodb_uri',
     coursesPath: '/Users/administrator/Desktop/Mongoosse/CSV/courses.csv',
     prerequisitesPath: '/Users/administrator/Desktop/Mongoosse/CSV/prerequisites.csv'
 };
 
-// Middleware
 app.use(bodyParser.json());
 
-// Routes
 app.use('/courses', courseRoutes);
 app.use('/prerequisites', prerequisiteRoutes);
 
@@ -133,12 +121,10 @@ app.get('/', (req: express.Request, res: express.Response) => {
     res.send('Hello, world!');
 });
 
-// Connect to MongoDB
 mongoose.connect(config.mongoURI)
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.log(`Error connecting to MongoDB: ${err.message}`));
 
-// Import courses and prerequisites
 const importData = async () => {
     try {
         const courses = await csvtojson().fromFile(config.coursesPath);
@@ -157,7 +143,6 @@ const importData = async () => {
     }
 };
 
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
